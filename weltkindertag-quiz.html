@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weltkindertag Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #d81b60 0%, #e91e63 50%, #ec407a 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #d81b60;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .progress {
+            background: #f8bbd0;
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #d81b60;
+            transition: width 0.3s;
+        }
+
+        .question-number {
+            color: #d81b60;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .question {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .options {
+            margin-bottom: 25px;
+        }
+
+        .option-wrapper {
+            margin-bottom: 12px;
+        }
+
+        .option-label {
+            display: block;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .option-label:hover {
+            border-color: #d81b60;
+            background: #fce4ec;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: #d81b60;
+        }
+
+        .option-text {
+            display: inline;
+        }
+
+        .source {
+            background: #fce4ec;
+            padding: 10px 15px;
+            border-left: 4px solid #d81b60;
+            margin-bottom: 25px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #333;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #d81b60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        button:hover:not(:disabled) {
+            background: #ad1457;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .results {
+            text-align: center;
+        }
+
+        .score-box {
+            background: #fce4ec;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .score-number {
+            font-size: 50px;
+            color: #d81b60;
+            font-weight: bold;
+        }
+
+        .score-text {
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .feedback {
+            background: #fce4ec;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .answers-review {
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+        }
+
+        .review-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 13px;
+        }
+
+        .review-item.correct {
+            background: #f0fdf4;
+            border-left: 3px solid #10b981;
+        }
+
+        .review-item.incorrect {
+            background: #fef2f2;
+            border-left: 3px solid #ef4444;
+        }
+
+        .button-reset {
+            background: white;
+            color: #d81b60;
+            border: 2px solid #d81b60;
+        }
+
+        .button-reset:hover {
+            background: #fce4ec;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Jusos Stolberg Quiz</h1>
+        <p class="subtitle">Bildung und Chancengleichheit in Deutschland</p>
+
+        <div id="quizSection">
+            <div class="progress">
+                <div class="progress-bar" id="progressBar" style="width: 9%"></div>
+            </div>
+
+            <div class="question-number">
+                Frage <span id="currentNum">1</span> von 11
+            </div>
+
+            <div class="question" id="questionText"></div>
+
+            <div class="options" id="optionsContainer"></div>
+
+            <div class="source" id="sourceText"></div>
+
+            <button id="nextBtn" onclick="nextQuestion()" disabled>Naechste Frage</button>
+        </div>
+
+        <div id="resultsSection" class="hidden results">
+            <h2>Dein Ergebnis</h2>
+
+            <div class="score-box">
+                <div class="score-number" id="scoreNum">0</div>
+                <div class="score-text" id="scoreText">/ 11 Punkte</div>
+            </div>
+
+            <div class="feedback" id="feedbackText"></div>
+
+            <h3 style="color: #0f3a7d; margin-bottom: 15px; text-align: left;">Deine Antworten:</h3>
+            <div class="answers-review" id="answersReview"></div>
+
+            <button class="button-reset" onclick="restartQuiz()">Quiz erneut spielen</button>
+        </div>
+    </div>
+
+    <script>
+        var questions = [
+            {
+                q: "Wie viele Kinder und Jugendliche gelten in Deutschland als arm oder armutsgefaehrdet?",
+                options: ["Ca. 500.000 Kinder", "Ca. 2 Millionen Kinder", "Ca. 3,5 Millionen Kinder", "Ca. 5 Millionen Kinder"],
+                correct: 1,
+                source: "Statistisches Bundesamt 2024"
+            },
+            {
+                q: "Wie hoch ist der Anteil der Schuelerinnen und Schueler mit Migrationshintergrund, die die Schule ohne regulaeren Abschluss verlassen?",
+                options: ["Ca. 5 Prozent", "Ca. 8 Prozent", "Ca. 13-15 Prozent", "Ca. 20 Prozent"],
+                correct: 2,
+                source: "Statistisches Bundesamt Mikrozensus 2023"
+            },
+            {
+                q: "In welchem Bundesland ist die Quote der Schulabgaenger ohne Hauptschulabschluss am hoechsten?",
+                options: ["NRW", "Bremen", "Baden-Wuerttemberg", "Schleswig-Holstein"],
+                correct: 1,
+                source: "Statistisches Bundesamt 2023"
+            },
+            {
+                q: "Wie viel finanzielle Unterstuetzung erhaelt eine vierkoepfige Familie im Buergergeld-Bezug durchschnittlich pro Monat?",
+                options: ["Ca. 1.200 EUR", "Ca. 1.800-2.000 EUR", "Ca. 2.500 EUR", "Ca. 3.000 EUR"],
+                correct: 1,
+                source: "Bundesagentur fuer Arbeit 2024"
+            },
+            {
+                q: "Welche Auswirkungen hat Kinderarmut auf die Gesundheit?",
+                options: ["Es laesst sich kein signifikanter Effekt nachweisen.", "Von Armut betroffene Kinder leiden statistisch gesehen deutlich haeufiger unter gesundheitlichen Problemen.", "Ausschliesslich die psychische Gesundheit ist beeintraechtigt.", "Die Auswirkungen sind minimal."],
+                correct: 1,
+                source: "DIW und Bundeszentrale fuer gesundheitliche Aufklaerung"
+            },
+            {
+                q: "Wie viel Prozent der Kinder aus einkommensschwachen Verhaeltnissen erlangen spaeter einen Universitaetsabschluss?",
+                options: ["Ca. 40 Prozent", "Ca. 30 Prozent", "Ca. 15-20 Prozent", "Ca. 5 Prozent"],
+                correct: 2,
+                source: "SOEP des DIW Berlin"
+            },
+            {
+                q: "Welcher der folgenden Faktoren ist kein primaerer Treiber fuer Bildungsungleichheit?",
+                options: ["Die soziale Herkunft", "Das familiare Einkommen", "Ein Migrationshintergrund", "Die Haarfarbe der Schuelerinnen und Schueler"],
+                correct: 3,
+                source: "Forsa-Studien zur Bildung"
+            },
+            {
+                q: "Wie heisst das finanzielle Foerderprogramm des Bundes zur Unterstuetzung armutsgefaehrdeter Familien?",
+                options: ["Chancenpaket und Kindersofortzuschlag", "Chancengleichheit-Akt", "Bildungsfonds", "Chancen-Gesetz"],
+                correct: 0,
+                source: "Bundesministerium fuer Familie Senioren Frauen und Jugend"
+            },
+            {
+                q: "Welches ist ein typischer indirekter Nachteil, den Kinderarmut im Schulalltag mit sich bringt?",
+                options: ["Das Kind lernt per se nicht schreiben.", "Dem Kind fehlen die Mittel fuer Schulausfluege Klassenfahrten oder Lernmaterialien.", "Das Kind besitzt von Geburt an eine geringere Intelligenz.", "Das Kind lernt nicht sprechen."],
+                correct: 1,
+                source: "Deutsches Institut fuer Menschenrechte und UNICEF Deutschland"
+            },
+            {
+                q: "Wie ist die Zustaendigkeit fuer das Bildungssystem in Deutschland geregelt?",
+                options: ["Bildungsfoederalismus: Kulturhoheit liegt bei den Bundeslaendern.", "Zentralismus: Ein Bundesministerium steuert alle Schulen einheitlich.", "Das Schulwesen ist fast vollstaendig privatisiert.", "Die Organisation obliegt den Religionsgemeinschaften."],
+                correct: 0,
+                source: "Grundgesetz Artikel 30"
+            },
+            {
+                q: "Was versteht man unter dem Matthaeus-Effekt im Bildungsbereich?",
+                options: ["Ein modernes interdisziplinaeres Unterrichtsmodell.", "Eine alternative Form des Schulabschlusses.", "Ein bundesweiter Schulsportwettbewerb.", "Das Prinzip wer hat dem wird gegeben: Kinder mit Startvorteilen profitieren ueberproportional."],
+                correct: 3,
+                source: "Soziologische Forschung zur Bildungsungleichheit"
+            }
+        ];
+
+        var currentQuestion = 0;
+        var userAnswers = {};
+
+        function showQuestion() {
+            var q = questions[currentQuestion];
+            document.getElementById('currentNum').textContent = currentQuestion + 1;
+            document.getElementById('questionText').textContent = q.q;
+            document.getElementById('sourceText').textContent = "Quelle: " + q.source;
+
+            var optionsHtml = "";
+            for (var i = 0; i < q.options.length; i++) {
+                optionsHtml += '<div class="option-wrapper"><label class="option-label"><input type="radio" name="answer" value="' + i + '" onchange="selectAnswer(' + i + ')"><span class="option-text">' + q.options[i] + '</span></label></div>';
+            }
+
+            document.getElementById('optionsContainer').innerHTML = optionsHtml;
+
+            if (userAnswers[currentQuestion] !== undefined) {
+                document.querySelector('input[value="' + userAnswers[currentQuestion] + '"]').checked = true;
+            }
+
+            updateProgress();
+        }
+
+        function selectAnswer(idx) {
+            userAnswers[currentQuestion] = idx;
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function updateProgress() {
+            var percentage = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+                document.getElementById('nextBtn').disabled = true;
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            var score = 0;
+            for (var i = 0; i < questions.length; i++) {
+                if (userAnswers[i] === questions[i].correct) {
+                    score++;
+                }
+            }
+
+            var percentage = Math.round((score / questions.length) * 100);
+
+            document.getElementById('quizSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+
+            document.getElementById('scoreNum').textContent = score;
+            document.getElementById('scoreText').textContent = "/ " + questions.length + " Punkte (" + percentage + "%)";
+
+            var feedback = "";
+            if (percentage >= 70) {
+                feedback = "Sehr gut! Du kennst dich mit dem Thema aus.";
+            } else if (percentage >= 50) {
+                feedback = "Gute Leistung! Lies die Quellen durch, um mehr zu erfahren.";
+            } else {
+                feedback = "Noch Lernpotenzial! Dieses Thema ist sehr wichtig.";
+            }
+            document.getElementById('feedbackText').textContent = feedback;
+
+            var answersHtml = "";
+            for (var i = 0; i < questions.length; i++) {
+                var correct = userAnswers[i] === questions[i].correct;
+                var className = correct ? "correct" : "incorrect";
+                var status = correct ? "✓" : "✗";
+                var userAnswer = questions[i].options[userAnswers[i]];
+                var correctAnswer = questions[i].options[questions[i].correct];
+
+                answersHtml += '<div class="review-item ' + className + '"><strong>Frage ' + (i + 1) + ': ' + status + '</strong><br>Deine Antwort: ' + userAnswer + '<br>';
+                if (!correct) {
+                    answersHtml += 'Richtig: ' + correctAnswer;
+                }
+                answersHtml += '</div>';
+            }
+            document.getElementById('answersReview').innerHTML = answersHtml;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            userAnswers = {};
+            document.getElementById('quizSection').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('nextBtn').disabled = true;
+            showQuestion();
+        }
+
+        showQuestion();
+    </script>
+</body>
+</html>
